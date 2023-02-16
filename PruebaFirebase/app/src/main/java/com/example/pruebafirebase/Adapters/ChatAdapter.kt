@@ -26,7 +26,7 @@ class ChatAdapter(val chatClick: (Chat) -> Unit):RecyclerView.Adapter<ChatViewHo
 
     override fun onBindViewHolder(holder: ChatViewHolder, position: Int) {
         holder.binding.chatNombreTxT.text = chats[position].nombre
-        holder.binding.usuarioTextView.text = chats[position].partcipantes.toString()
+        holder.binding.usuarioTextView.text = chats[position].participantes.toString()
 
         holder.itemView.setOnClickListener {
             chatClick(chats[position])

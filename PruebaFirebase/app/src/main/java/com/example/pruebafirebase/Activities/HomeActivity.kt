@@ -1,6 +1,5 @@
 package com.example.pruebafirebase.Activities
 
-import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -19,7 +18,10 @@ import com.google.firebase.ktx.Firebase
 import java.util.*
 
 
+
 class HomeActivity : AppCompatActivity() {
+    //Aquí creamos las variables globales que usaremos a lo largo de esta actividad
+    //Estas dos serán para saber que chat es en el que se ha metido el usuario y que usuario es
     private lateinit var usuario:String;
 
     private lateinit var googleSignInClient: GoogleSignInClient
@@ -28,6 +30,7 @@ class HomeActivity : AppCompatActivity() {
 
     lateinit var auth: FirebaseAuth
 
+    //Variable que nos permite usar nuestra base de datos en firestore
     val db = Firebase.firestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,18 +39,23 @@ class HomeActivity : AppCompatActivity() {
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        //Obtenemos el email que nos manda la actividad anterior
         val bundle:Bundle? = intent.extras
         usuario = bundle?.getString("email")!!
-        setUp(usuario ?: "")
+        mostrarListaChats(usuario ?: "")
 
         auth = FirebaseAuth.getInstance()
 
-        val prefs = getSharedPreferences("com.example.pruebafirebase.PREFERENCE_FILE_KEY", Context.MODE_PRIVATE).edit()
+        val prefs = getSharedPreferences("com.example.pruebafirebase.PREFERENCE_FILE_KEY", MODE_PRIVATE).edit()
         prefs.putString("email", usuario)
         prefs.apply()
     }
 
-    private fun setUp(email: String) {
+    /**
+     * Método donde mostraremos el listado de chats que tiene el usuario. Para ello utilizaremos
+     * el ChatAdapter que irá bindeado al item mensaje.
+     */
+    private fun mostrarListaChats(email: String) {
         title = "Inicio"
 
         binding.tvEmail.text = email
@@ -61,7 +69,7 @@ class HomeActivity : AppCompatActivity() {
 
 
         binding.btnLogOut.setOnClickListener {
-            val prefs = getSharedPreferences("com.example.pruebafirebase.PREFERENCE_FILE_KEY", Context.MODE_PRIVATE).edit()
+            val prefs = getSharedPreferences("com.example.pruebafirebase.PREFERENCE_FILE_KEY", MODE_PRIVATE).edit()
             prefs.clear()
             prefs.apply()
 
@@ -70,7 +78,7 @@ class HomeActivity : AppCompatActivity() {
             onBackPressed()
         }
 
-        binding.newChatButton.setOnClickListener { newChat() }
+        binding.newChatButton.setOnClickListener { crearNuevoChat() }
 
         binding.listChatsRecyclerView.layoutManager = LinearLayoutManager(this)
         binding.listChatsRecyclerView.adapter =
@@ -78,37 +86,53 @@ class HomeActivity : AppCompatActivity() {
                 chatSelected(chat)
             }
 
-        val userRef = db.collection("users").document(usuario)
+        val userRef = db.collection("usuarios").document(usuario)
 
         userRef.collection("chats")
             .get()
+            /*Añadimos un addOnSuccessListener para en caso de que se ejecute correctamente la
+            query, el listado de chats se bindeará a la vista y será visible para el usuario*/
             .addOnSuccessListener { chats ->
                 val listChats = chats.toObjects(Chat::class.java)
-
                 (binding.listChatsRecyclerView.adapter as ChatAdapter).setData(listChats)
             }
 
         userRef.collection("chats")
+            /* Añadimos un SnapshotListener  para detectar a tiempo real de las actualizaciones de
+            la base de datos, ya que registra el estado del documento cuando se ejecuta y cada vez
+            que detecta un cambio en el documento lo vuelve a actualizar instantaneamente*/
             .addSnapshotListener { chats, error ->
                 if(error == null){
                     chats?.let {
-                        val listChats = it.toObjects(Chat::class.java)
-
-                        (binding.listChatsRecyclerView.adapter as ChatAdapter).setData(listChats)
+                        val listaChats = it.toObjects(Chat::class.java)
+                        (binding.listChatsRecyclerView.adapter as ChatAdapter).setData(listaChats)
                     }
                 }
             }
-
     }
 
+    /**
+     * Método que se ejecutará cada vez que ejecutemos un chat. Mandaremos al usuario a la siguiente
+     * actividad, además del id del chat que ha sido seleccionado y el nombre del usuario.
+     * Precondición: ninguna
+     * Postcondición: ninguna
+     */
     private fun chatSelected(chat:Chat){
         val intent = Intent(this, ChatActivity::class.java)
-        intent.putExtra("chatId",chat.id)
-        intent.putExtra("participantes",usuario)
+        intent.putExtra("id",chat.id)
+        intent.putExtra("usuario",usuario)
         startActivity(intent)
     }
 
-    private fun newChat(){
+    /**
+     * Creamos un nuevo chat con el usuario que ha seleccionado el usuario. Crearemos una nueva
+     * clase chat con un id, y el nombre tanto del usuario actual como del que este ha introducido
+     * para formar el chat. Esta clase chat será introducida en la base de datos para su posterior
+     * uso. Por último, mandaremos al usuario al nuevo chat que acaba de crear.
+     * Precondición: ninguna
+     * Postcondicion: ninguna
+     */
+    private fun crearNuevoChat(){
         val chatId = UUID.randomUUID().toString()
         val otherUser = binding.newChatText.text.toString()
         val users = listOf(usuario, otherUser)
@@ -116,17 +140,16 @@ class HomeActivity : AppCompatActivity() {
         val chat = Chat(
             id = chatId,
             nombre = "Chat con $otherUser",
-            partcipantes = users
+            participantes = users
         )
 
         db.collection("chats").document(chatId).set(chat)
-        db.collection("users").document(usuario).collection("chats").document(chatId).set(chat)
-        db.collection("users").document(otherUser).collection("chats").document(chatId).set(chat)
+        db.collection("usuarios").document(usuario).collection("chats").document(chatId).set(chat)
+        db.collection("usuarios").document(otherUser).collection("chats").document(chatId).set(chat)
 
         val intent = Intent(this, ChatActivity::class.java)
         intent.putExtra("chatId", chatId)
-        intent.putExtra("user", usuario)
+        intent.putExtra("usuarios", usuario)
         startActivity(intent)
-
     }
 }

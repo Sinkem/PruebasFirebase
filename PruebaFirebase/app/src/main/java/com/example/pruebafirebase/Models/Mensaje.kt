@@ -5,5 +5,5 @@ import java.util.Date
 data class Mensaje(
     var emisor: String = "",
     var mensaje: String = "",
-    var fechaEnvio: Date
+    var fechaEnvio: Date = Date()
 )

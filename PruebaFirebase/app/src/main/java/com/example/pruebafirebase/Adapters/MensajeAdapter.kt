@@ -30,11 +30,16 @@ class MensajeAdapter(private val user: String): RecyclerView.Adapter<MensajeView
         val mensaje = mensajes[position]
 
         if(user == mensaje.emisor){
-            holder.binding.otroMensajeLayout.visibility = View.VISIBLE
-            holder.binding.miMensajeTxt.visibility = View.GONE
-        } else {
             holder.binding.miMensajeTxt.visibility = View.VISIBLE
             holder.binding.otroMensajeLayout.visibility = View.GONE
+
+            holder.binding.miMensajeTxt.text = mensaje.mensaje
+        } else {
+
+            holder.binding.otroMensajeLayout.visibility = View.VISIBLE
+            holder.binding.miMensajeTxt.visibility = View.GONE
+
+            holder.binding.otroMensajeTxt.text = mensaje.mensaje
         }
 
     }
