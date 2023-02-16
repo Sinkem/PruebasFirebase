@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.pruebafirebase.Models.Mensaje
 import com.example.pruebafirebase.R
 
-class MensajeAdapter(private val user: String): RecyclerView.Adapter<MensajeAdapter.MensajeViewHolder>() {
+class MensajeAdapter(private val user: String): RecyclerView.Adapter<MensajeViewHolder>() {
 
     private var mensajes: List<Mensaje> = emptyList()
 
@@ -30,13 +30,11 @@ class MensajeAdapter(private val user: String): RecyclerView.Adapter<MensajeAdap
         val mensaje = mensajes[position]
 
         if(user == mensaje.emisor){
-            holder.itemView.otherMessageLayout.visibility = View.GONE
-            holder.itemView.myMessageTextView.text = mensaje.mensaje
+            holder.binding.otroMensajeLayout.visibility = View.VISIBLE
+            holder.binding.miMensajeTxt.visibility = View.GONE
         } else {
-            holder.itemView.myMessageLayout.visibility = View.GONE
-            holder.itemView.otherMessageLayout.visibility = View.VISIBLE
-
-            holder.itemView.othersMessageTextView.text = mensaje.mensaje
+            holder.binding.miMensajeTxt.visibility = View.VISIBLE
+            holder.binding.otroMensajeLayout.visibility = View.GONE
         }
 
     }
@@ -45,5 +43,4 @@ class MensajeAdapter(private val user: String): RecyclerView.Adapter<MensajeAdap
         return mensajes.size
     }
 
-    class MensajeViewHolder(itemView: View): RecyclerView.ViewHolder(itemView)
 }

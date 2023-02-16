@@ -1,10 +1,10 @@
-package com.example.pruebafirebase
+package com.example.pruebafirebase.Activities
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.example.pruebafirebase.databinding.ActivityInsertBinding
 
-class InsertActivity : AppCompatActivity() {
+class ChatActivity : AppCompatActivity() {
     private lateinit var binding: ActivityInsertBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {

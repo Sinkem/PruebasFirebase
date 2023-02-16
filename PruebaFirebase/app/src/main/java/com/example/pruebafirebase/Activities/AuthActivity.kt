@@ -1,4 +1,4 @@
-package com.example.pruebafirebase
+package com.example.pruebafirebase.Activities
 
 import android.app.Activity
 import android.content.Context
@@ -10,6 +10,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import com.example.pruebafirebase.R
 import com.example.pruebafirebase.databinding.ActivityAuthBinding
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -19,9 +20,7 @@ import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthCredential
 import com.google.firebase.auth.GoogleAuthProvider
-import java.security.Provider
 
 class AuthActivity : AppCompatActivity() {
     private lateinit var auth : FirebaseAuth
@@ -76,7 +75,7 @@ class AuthActivity : AppCompatActivity() {
         val credential = GoogleAuthProvider.getCredential(account.idToken, null)
         auth.signInWithCredential(credential).addOnCompleteListener {
             if (it.isSuccessful){
-                showHome(it.result?.user?.email ?: "", ProviderType.GOOGLE)
+                showHome(it.result?.user?.email ?: "")
             } else {
                 Toast.makeText(this, it.exception.toString(), Toast.LENGTH_SHORT).show()
             }
@@ -99,7 +98,7 @@ class AuthActivity : AppCompatActivity() {
 
         if (email != null && provider != null) {
             binding.authLayout.visibility = View.INVISIBLE
-            showHome(email, ProviderType.valueOf(provider))
+            showHome(email)
         }
     }
 
@@ -120,7 +119,7 @@ class AuthActivity : AppCompatActivity() {
                     binding.etPassword.text.toString()
                 ).addOnCompleteListener {
                     if (it.isSuccessful) {
-                        showHome(it.result?.user?.email ?: "", ProviderType.BASIC)
+                        showHome(it.result?.user?.email ?: "")
                     } else {
                         Log.e("Firebase Auth", "Sign-in failed", it.exception);
                         showAlert()
@@ -137,7 +136,7 @@ class AuthActivity : AppCompatActivity() {
                     binding.etPassword.text.toString()
                 ).addOnCompleteListener {
                     if (it.isSuccessful) {
-                        showHome(it.result?.user?.email ?: "", ProviderType.BASIC)
+                        showHome(it.result?.user?.email ?: "")
                     } else {
                         showAlert()
                     }
@@ -173,10 +172,9 @@ class AuthActivity : AppCompatActivity() {
         dialog.show()
     }
 
-    private fun showHome(email: String, provider: ProviderType) {
+    private fun showHome(email: String) {
         val homeIntent = Intent(this, HomeActivity::class.java).apply {
             putExtra("email", email)
-            putExtra("provider", provider.name)
         }
         startActivity(homeIntent)
     }
@@ -194,7 +192,7 @@ class AuthActivity : AppCompatActivity() {
                     FirebaseAuth.getInstance().signInWithCredential(credential)
                         .addOnCompleteListener {
                             if (it.isSuccessful) {
-                                showHome(account.email ?: "", ProviderType.GOOGLE)
+                                showHome(account.email ?: "")
                             } else {
                                 Log.e("ErroGoogle", "Erro",it.exception)
                                 showAlert()
