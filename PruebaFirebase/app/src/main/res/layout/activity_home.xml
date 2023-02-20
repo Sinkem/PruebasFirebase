@@ -62,7 +62,7 @@
             android:id="@+id/tvEmail"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:background="#FEFFFF"
+            android:background="#20FFFFFF"
             android:text="Email" />
 
         <Button

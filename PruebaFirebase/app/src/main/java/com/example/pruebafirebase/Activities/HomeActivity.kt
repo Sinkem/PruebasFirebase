@@ -3,9 +3,11 @@ package com.example.pruebafirebase.Activities
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.pruebafirebase.Adapters.ChatAdapter
 import com.example.pruebafirebase.Models.Chat
+import com.example.pruebafirebase.Models.Usuario
 import com.example.pruebafirebase.R
 import com.example.pruebafirebase.databinding.ActivityHomeBinding
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -25,6 +27,8 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var usuario:String;
 
     private lateinit var googleSignInClient: GoogleSignInClient
+
+    private lateinit var listChats: kotlin.collections.List<Chat>
 
     lateinit var binding: ActivityHomeBinding
 
@@ -104,8 +108,8 @@ class HomeActivity : AppCompatActivity() {
             .addSnapshotListener { chats, error ->
                 if(error == null){
                     chats?.let {
-                        val listaChats = it.toObjects(Chat::class.java)
-                        (binding.listChatsRecyclerView.adapter as ChatAdapter).setData(listaChats)
+                        listChats = it.toObjects(Chat::class.java)
+                        (binding.listChatsRecyclerView.adapter as ChatAdapter).setData(listChats)
                     }
                 }
             }
@@ -133,23 +137,41 @@ class HomeActivity : AppCompatActivity() {
      * Postcondicion: ninguna
      */
     private fun crearNuevoChat(){
-        val chatId = UUID.randomUUID().toString()
         val otherUser = binding.newChatText.text.toString()
-        val users = listOf(usuario, otherUser)
+        val userRef = db.collection("usuarios").document(otherUser)
+        var listaUsuarios = emptyList<Usuario>()
+      /*  userRef.get().addOnSuccessListener { usuarios ->
+            listaUsuarios = usuarios.toObjects(Usuario::class.java)
+        }*/
+        val otherUserExists = listChats.find { it.participantes.contains(otherUser) }
+        if (!usuario.equals(otherUser) && otherUserExists == null){
+            if (userRef.equals(null)){
+                val chatId = UUID.randomUUID().toString()
+                val users = listOf(usuario, otherUser)
 
-        val chat = Chat(
-            id = chatId,
-            nombre = "Chat con $otherUser",
-            participantes = users
-        )
+                val chat = Chat(
+                    id = chatId,
+                    nombre = "Chat con $otherUser",
+                    participantes = users
+                )
 
-        db.collection("chats").document(chatId).set(chat)
-        db.collection("usuarios").document(usuario).collection("chats").document(chatId).set(chat)
-        db.collection("usuarios").document(otherUser).collection("chats").document(chatId).set(chat)
+                db.collection("chats").document(chatId).set(chat)
+                db.collection("usuarios").document(usuario).collection("chats").document(chatId).set(chat)
+                db.collection("usuarios").document(otherUser).collection("chats").document(chatId).set(chat)
 
+            } else {
+                Toast.makeText(this, "Error, el usuario no esta registrado", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            Toast.makeText(this, "Error, usuario no valido", Toast.LENGTH_SHORT).show()
+
+        }
+
+/*
         val intent = Intent(this, ChatActivity::class.java)
         intent.putExtra("chatId", chatId)
-        intent.putExtra("usuarios", usuario)
         startActivity(intent)
+        intent.putExtra("usuarios", usuario)
+        */
     }
 }

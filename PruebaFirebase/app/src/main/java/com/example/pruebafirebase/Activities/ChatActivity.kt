@@ -96,9 +96,12 @@ class ChatActivity : AppCompatActivity() {
             emisor = usuario,
             fechaEnvio = Date()
         )
-        db.collection("chats").document(chatId).collection("mensajes").document().set(message)
-        /* Vaciamos el textView una vez enviado el mensaje, tal como cualquier otra aplicación de
-         mensajería */
-        binding.messageTextField.setText("")
+        if (message.mensaje.isNotBlank()){
+            db.collection("chats").document(chatId).collection("mensajes").document().set(message)
+            /* Vaciamos el textView una vez enviado el mensaje, tal como cualquier otra aplicación de
+             mensajería */
+            binding.messageTextField.setText("")
+        }
+
     }
 }
