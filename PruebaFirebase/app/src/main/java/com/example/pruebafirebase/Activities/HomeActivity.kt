@@ -145,7 +145,7 @@ class HomeActivity : AppCompatActivity() {
         }*/
         val otherUserExists = listChats.find { it.participantes.contains(otherUser) }
         if (!usuario.equals(otherUser) && otherUserExists == null){
-            if (userRef.equals(null)){
+            if (!userRef.equals(null)){
                 val chatId = UUID.randomUUID().toString()
                 val users = listOf(usuario, otherUser)
 
